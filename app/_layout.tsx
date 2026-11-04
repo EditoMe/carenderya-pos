@@ -1,56 +1,46 @@
-import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
+import { Stack } from 'expo-router';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/components/useColorScheme';
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+import { Platform } from 'react-native';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { PosProvider } from '@/store/pos';
+import { PhotosProvider } from '@/store/photos';
+import { AdminProvider } from '@/store/admin';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+    // Landscape-first POS: tablets/phones lock to landscape.
+    // Web has limited support — never let it throw.
+    (async () => {
+      try {
+        if (Platform.OS === 'web') return;
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+      } catch {
+        // ignore — orientation lock is best-effort
+      }
+    })();
+  }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+    <PosProvider>
+      <PhotosProvider>
+        <AdminProvider>
+          <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, orientation: 'landscape' }} />
+        <Stack.Screen
+          name="checkout"
+          options={{ presentation: 'modal', headerShown: false, orientation: 'landscape' }}
+        />
+        <Stack.Screen
+          name="order/[id]"
+          options={{ title: 'Order Detail', orientation: 'landscape' }}
+        />
       </Stack>
-    </ThemeProvider>
+        </AdminProvider>
+      </PhotosProvider>
+    </PosProvider>
   );
 }

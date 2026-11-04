@@ -1,14 +1,15 @@
 {
   "expo": {
-    "name": "carenderya-pos",
+    "name": "Carenderya POS",
     "slug": "carenderya-pos",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/images/icon.png",
     "scheme": "carenderyapos",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "requireFullScreen": true
     },
     "android": {
       "adaptiveIcon": {
@@ -26,6 +27,20 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "LANDSCAPE"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Carenderya POS to access your photos to set dish images.",
+          "cameraPermission": "Allow Carenderya POS to use your camera to take dish photos.",
+          "microphonePermission": false
+        }
+      ],
       [
         "expo-splash-screen",
         {
